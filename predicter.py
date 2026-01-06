@@ -112,3 +112,26 @@ def seed_database():
                 ]
             }
         ])
+
+        if instructions_col.count_documents({}) == 0:
+           instructions_col.insert_many([
+            {
+                "type": "analysis",
+                "text": "Identify and discuss the ethical issues arising from the advocate’s conduct",
+                "support": [
+                    "with reference to the Advocates Act",
+                    "with reference to the LSK Code of Conduct",
+                    "using relevant legal principles"
+                ],
+                "marks": [8, 10, 12]
+            },
+            {
+                "type": "procedure",
+                "text": "Explain the disciplinary process that may be instituted against the advocate",
+                "support": [
+                    "including the role of the Advocates Complaints Commission",
+                    "including the role of the Advocates Disciplinary Tribunal",
+                    "outlining possible sanctions"
+                ],
+                "marks": [8, 10]             }
+        ])
