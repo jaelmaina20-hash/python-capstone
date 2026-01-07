@@ -10,7 +10,6 @@ uri = os.getenv("MONGODB_URI")
 client = MongoClient(uri)
 
 db = client["predicter"]
-predicter = db["predicter"]
 
 themes = db["themes"]
 instructions = db["instructions"]
@@ -114,8 +113,8 @@ def database():
             }
         ])
 
-        if instructions.count_documents({}) == 0:
-           instructions.insert_many([
+    if instructions.count_documents({}) == 0:
+          instructions.insert_many([
             {
                 "type": "analysis",
                 "text": "Identify and discuss the ethical issues arising from the advocate’s conduct",
@@ -147,3 +146,47 @@ def scenario(theme):
         f"During the course of the representation, the advocate {conduct} "
         f"{aggravation}."
     )
+
+def build_instruction(item):
+    support1, support2 = random.sample(item["support"], 2)
+    marks = random.choice(item["marks"])
+    return f"{item['text']} {support1} and {support2}. ({marks} marks)"
+
+def generate_question():
+    theme_list = list(themes.find())
+    instruction_list = list(instructions.find())
+    theme_a, theme_b = random.sample(theme_list, 2)
+    scenario_a = scenario(theme_a)
+    scenario_b = scenario(theme_b)
+    part_a = build_instruction(random.choice(instruction_list))
+    part_b = build_instruction(random.choice(instruction_list))
+
+    question = (
+        "QUESTION ONE - PROFESSIONAL ETHICS\n\n"
+        f"{scenario_a}\n\n"
+        f"Further, it later emerged that the same advocate also {scenario_b.lower()}\n\n"
+        f"(a) {part_a}\n\n"
+        f"(b) {part_b}"
+    )
+    return {
+        "year": 2026,
+        "themes": [theme_a["theme"], theme_b["theme"]],
+        "question": question
+    }
+
+def generate_questions():
+    output = []
+    for _ in range(4):
+        q = generate_question()
+        questions.insert_one(q)
+        output.append(q["question"])
+    return output
+
+
+if __name__ == "__main__":
+    database()
+    questions = generate_questions()
+
+    for i in range(len(questions)):
+     print(f"PROBABLE QUESTION {i + 1}")
+     print(questions[i])
