@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+import random
 
 load_dotenv()
 
@@ -11,14 +12,14 @@ client = MongoClient(uri)
 db = client["predicter"]
 predicter = db["predicter"]
 
-themes_col = db["themes"]
-instructions_col = db["instructions"]
-questions_col = db["generated_questions"]
+themes = db["themes"]
+instructions = db["instructions"]
+questions = db["generated_questions"]
 
 
-def seed_database():
-    if themes_col.count_documents({}) == 0:
-        themes_col.insert_many([
+def database():
+    if themes.count_documents({}) == 0:
+        themes.insert_many([
             {
                 "theme": "Confidentiality",
                 "actors": [
@@ -34,10 +35,10 @@ def seed_database():
                 "conduct": [
                     "disclosed confidential information to a journalist",
                     "shared privileged documents with a third party",
-                    "discussed the client’s matter on a public platform"
+                    "discussed the client's matter on a public platform"
                 ],
                 "aggravation": [
-                    "without the client’s consent",
+                    "without the client's consent",
                     "while the matter was pending before court",
                     "after receiving express instructions to the contrary"
                 ]
@@ -113,8 +114,8 @@ def seed_database():
             }
         ])
 
-        if instructions_col.count_documents({}) == 0:
-           instructions_col.insert_many([
+        if instructions.count_documents({}) == 0:
+           instructions.insert_many([
             {
                 "type": "analysis",
                 "text": "Identify and discuss the ethical issues arising from the advocate’s conduct",
@@ -135,3 +136,14 @@ def seed_database():
                 ],
                 "marks": [8, 10]             }
         ])
+           
+def scenario(theme):
+    actor = random.choice(theme["actors"])
+    client = random.choice(theme["clients"])
+    conduct = random.choice(theme["conduct"])
+    aggravation = random.choice(theme["aggravation"])
+    return (
+        f"{actor} acts for {client}. "
+        f"During the course of the representation, the advocate {conduct} "
+        f"{aggravation}."
+    )
